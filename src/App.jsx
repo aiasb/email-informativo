@@ -456,13 +456,12 @@ export default function App() {
     return html;
   };
 
-  // Gera arquivo .eml com o HTML como anexo — ao abrir, o Outlook cria o rascunho com o anexo
+  // Gera arquivo .eml com o HTML como corpo — ao abrir, o Outlook cria o rascunho formatado
   const handleExportHTML = () => {
     setIsExportingHTML(true);
     try {
       const html = generateEmailHTML();
       const date = new Date().toISOString().slice(0, 10);
-      const attachName = `ti_informa_email_${date}.html`;
       const subject = headerTitle.replace(/<[^>]*>/g, '') + ' — Comunicado TI';
 
       // UTF-8 → base64 (compatível com caracteres especiais)
@@ -473,23 +472,22 @@ export default function App() {
       // Quebra em linhas de 76 chars (padrão MIME)
       const htmlB64Chunked = htmlBase64.match(/.{1,76}/g).join('\r\n');
 
-      const boundary = `----=_Part_${Date.now()}`;
+      const boundary = `----=_Alt_${Date.now()}`;
 
       const eml = [
         'MIME-Version: 1.0',
         `Date: ${new Date().toUTCString()}`,
         `Subject: ${subject}`,
-        `Content-Type: multipart/mixed; boundary="${boundary}"`,
+        `Content-Type: multipart/alternative; boundary="${boundary}"`,
         '',
         `--${boundary}`,
         'Content-Type: text/plain; charset=UTF-8',
         '',
-        'Prezados, segue em anexo o comunicado de TI.',
+        subject,
         '',
         `--${boundary}`,
-        `Content-Type: text/html; charset=UTF-8; name="${attachName}"`,
+        'Content-Type: text/html; charset=UTF-8',
         'Content-Transfer-Encoding: base64',
-        `Content-Disposition: attachment; filename="${attachName}"`,
         '',
         htmlB64Chunked,
         '',
@@ -502,7 +500,7 @@ export default function App() {
       link.href = URL.createObjectURL(blob);
       link.click();
       URL.revokeObjectURL(link.href);
-      showToast('✅ Arquivo .eml gerado — abra para enviar pelo Outlook');
+      showToast('✅ Arquivo .eml gerado — abra para compor no Outlook');
     } catch (err) {
       console.error(err);
       showToast('❌ Erro ao gerar arquivo .eml');
