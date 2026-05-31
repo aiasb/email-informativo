@@ -329,8 +329,8 @@ export default function App() {
                   ${c.icon}
                 </td>
                 <td valign="middle" style="padding:14px 16px;">
-                  <p style="margin:0 0 4px 0;font-size:${labelSize};font-weight:800;letter-spacing:2px;text-transform:uppercase;color:${palette.label};font-family:${fontStack};">${c.label}</p>
-                  <p style="margin:0;font-size:${bodySize};color:#1A2E3B;font-family:${fontStack};line-height:1.5;">${c.content}</p>
+                  <div style="margin:0 0 4px 0;font-size:${labelSize};font-weight:800;letter-spacing:2px;text-transform:uppercase;color:${palette.label};font-family:${fontStack};">${c.label}</div>
+                  <div style="margin:0;font-size:${bodySize};color:#1A2E3B;font-family:${fontStack};line-height:1.5;">${c.content}</div>
                 </td>
               </tr>
             </table>
@@ -359,11 +359,12 @@ export default function App() {
   <tr>
     <td align="center" bgcolor="#C5CDD4" style="padding:32px 16px;">
 
-      <table width="780" cellpadding="0" cellspacing="0" border="0" style="width:780px;">
+      <!--[if (gte mso 9)|(IE)]><table width="600" align="center" cellpadding="0" cellspacing="0" border="0"><tr><td><![endif]-->
+      <table width="600" cellpadding="0" cellspacing="0" border="0" style="width:600px;max-width:600px;">
 
         <!-- HEADER -->
         <tr>
-          <td bgcolor="#1565A6" style="background:linear-gradient(100deg,#1565A6 0%,#1A7FAA 35%,#1E9A6E 68%,#2BBD5A 100%);padding:0 28px;height:88px;vertical-align:middle;">
+          <td bgcolor="#1565A6" style="background:linear-gradient(100deg,#1565A6 0%,#1A7FAA 35%,#1E9A6E 68%,#2BBD5A 100%);padding:0 24px;height:88px;vertical-align:middle;">
             <table width="100%" cellpadding="0" cellspacing="0" border="0">
               <tr>
                 <td width="66" valign="middle" style="padding:11px 0;width:66px;">
@@ -394,7 +395,7 @@ export default function App() {
 
         <!-- BODY -->
         <tr>
-          <td bgcolor="#F0F4F7" style="background-color:#F0F4F7;padding:26px 36px 0 36px;">
+          <td bgcolor="#F0F4F7" style="background-color:#F0F4F7;padding:24px 24px 0 24px;">
 
             <!-- Comm Header -->
             <table width="100%" cellpadding="0" cellspacing="0" border="0">
@@ -445,8 +446,8 @@ export default function App() {
                         ${alertIcon}
                       </td>
                       <td valign="middle" style="padding:16px 16px 16px 0;">
-                        <p style="margin:0 0 4px 0;font-size:13px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:#92400E;font-family:${fontStack};">${alertTitle}</p>
-                        <p style="margin:0;font-size:${bodySize};color:#78350F;line-height:1.55;font-family:${fontStack};">${alertText}</p>
+                        <div style="margin:0 0 4px 0;font-size:13px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:#92400E;font-family:${fontStack};">${alertTitle}</div>
+                        <div style="margin:0;font-size:${bodySize};color:#78350F;line-height:1.55;font-family:${fontStack};">${alertText}</div>
                       </td>
                     </tr>
                   </table>
@@ -462,7 +463,7 @@ export default function App() {
 
         <!-- FOOTER -->
         <tr>
-          <td bgcolor="#1A2E3B" style="background-color:#1A2E3B;padding:16px 36px;">
+          <td bgcolor="#1A2E3B" style="background-color:#1A2E3B;padding:14px 24px;">
             <table width="100%" cellpadding="0" cellspacing="0" border="0">
               <tr>
                 <td valign="middle">
@@ -484,6 +485,7 @@ export default function App() {
         </tr>
 
       </table>
+      <!--[if (gte mso 9)|(IE)]></td></tr></table><![endif]-->
     </td>
   </tr>
 </table>
