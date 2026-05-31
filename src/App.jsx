@@ -334,7 +334,7 @@ export default function App() {
     }).join('');
 
     const html = `<!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -347,16 +347,17 @@ export default function App() {
 <body style="margin:0;padding:0;background:#C5CDD4;font-family:${fontStack};">
 
 <!-- Wrapper -->
-<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#C5CDD4;">
-  <tr><td align="center" style="padding:32px 16px;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#C5CDD4" style="background:#C5CDD4;">
+  <tr><td align="center" bgcolor="#C5CDD4" style="padding:32px 16px;">
 
     <!-- Container -->
     <table width="780" cellpadding="0" cellspacing="0" border="0" style="max-width:780px;width:100%;border-radius:18px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,.18);">
 
       <!-- HEADER -->
       <tr>
-        <td style="background:linear-gradient(100deg,#1565A6 0%,#1A7FAA 35%,#1E9A6E 68%,#2BBD5A 100%);padding:0 28px;height:88px;">
-          <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <td bgcolor="#1565A6" style="padding:0;height:88px;background:linear-gradient(100deg,#1565A6 0%,#1A7FAA 35%,#1E9A6E 68%,#2BBD5A 100%);">
+          <!--[if gte mso 9]><v:rect xmlns:v="urn:schemas-microsoft-com:vml" fill="true" stroke="false" style="mso-width-percent:1000;height:88px;"><v:fill type="gradient" color="#1565A6" color2="#2BBD5A" angle="349"/><v:textbox inset="28px,0px,28px,0px" style="mso-fit-shape-to-text:true"><![endif]-->
+          <table width="100%" cellpadding="0" cellspacing="0" border="0" style="padding:0 28px;">
             <tr>
               <td width="70" valign="middle" style="padding:11px 0;">
                 <img src="${logoSrc}" width="66" height="66" alt="Logo" style="display:block;border-radius:12px;object-fit:contain;" />
@@ -365,25 +366,26 @@ export default function App() {
                 <div style="font-size:0;line-height:0;">&#8250;&#8250;&#8250;</div>
               </td>
               <td valign="middle" style="padding:11px 0;">
-                <div style="font-size:${labelSize};font-weight:700;letter-spacing:4px;color:rgba(255,255,255,.8);text-transform:uppercase;font-family:${fontStack};">${headerEye}</div>
-                <div style="font-size:${headerSize};font-weight:800;letter-spacing:1.5px;color:#fff;text-transform:uppercase;line-height:1;font-family:${fontStack};">${headerTitle}</div>
+                <div style="font-size:${labelSize};font-weight:700;letter-spacing:4px;color:#CCE0F5;text-transform:uppercase;font-family:${fontStack};">${headerEye}</div>
+                <div style="font-size:${headerSize};font-weight:800;letter-spacing:1.5px;color:#ffffff;text-transform:uppercase;line-height:1;font-family:${fontStack};">${headerTitle}</div>
               </td>
               <td width="120" valign="middle" align="right" style="padding:11px 0;">
-                <div style="background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.3);border-radius:8px;padding:8px 16px;font-size:13px;font-weight:700;color:#fff;letter-spacing:.5px;text-align:center;font-family:${fontStack};">${dateDisplay}</div>
+                <div style="background:#2a5fa8;border:1px solid #4d8fd4;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:700;color:#ffffff;letter-spacing:.5px;text-align:center;font-family:${fontStack};">${dateDisplay}</div>
               </td>
             </tr>
           </table>
+          <!--[if gte mso 9]></v:textbox></v:rect><![endif]-->
         </td>
       </tr>
 
       <!-- STRIPE -->
       <tr>
-        <td height="4" style="background:linear-gradient(90deg,#1565A6,#2BBD5A);font-size:0;line-height:0;">&nbsp;</td>
+        <td height="4" bgcolor="#1565A6" style="background:linear-gradient(90deg,#1565A6,#2BBD5A);font-size:0;line-height:0;">&nbsp;</td>
       </tr>
 
       <!-- BODY -->
       <tr>
-        <td style="background:#F0F4F7;padding:26px 36px 0 36px;">
+        <td bgcolor="#F0F4F7" style="background-color:#F0F4F7;padding:26px 36px 0 36px;">
 
           <!-- Comm Header -->
           <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:18px;">
@@ -408,7 +410,7 @@ export default function App() {
           ${cardsHTML}
 
           <!-- Alert -->
-          <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:18px;margin-bottom:0;background:#FFF8E1;border-radius:12px;border-left:4px solid #F59E0B;">
+          <table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#FFF8E1" style="margin-top:18px;margin-bottom:0;background-color:#FFF8E1;border-radius:12px;border-left:4px solid #F59E0B;">
             <tr>
               <td width="54" valign="middle" style="padding:16px 12px;text-align:center;">
                 <div style="font-size:26px;line-height:1;">${alertIcon}</div>
@@ -425,7 +427,7 @@ export default function App() {
 
       <!-- FOOTER -->
       <tr>
-        <td style="background:#1A2E3B;padding:16px 36px;">
+        <td bgcolor="#1A2E3B" style="background-color:#1A2E3B;padding:16px 36px;">
           <table width="100%" cellpadding="0" cellspacing="0" border="0">
             <tr>
               <td valign="middle">
@@ -443,7 +445,7 @@ export default function App() {
 
       <!-- BOTTOM BAR -->
       <tr>
-        <td height="6" style="background:linear-gradient(90deg,#1565A6,#2BBD5A);font-size:0;line-height:0;">&nbsp;</td>
+        <td height="6" bgcolor="#2BBD5A" style="background:linear-gradient(90deg,#1565A6,#2BBD5A);font-size:0;line-height:0;">&nbsp;</td>
       </tr>
 
     </table>
