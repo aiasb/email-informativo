@@ -315,27 +315,29 @@ export default function App() {
     const headerSize = sizes.header;
     const labelSize = sizes.label;
 
+    // Cada card é envolto por uma tabela-borda (1px sólido via bgcolor)
     const cardsHTML = cards.map((c) => {
       const palette = CARD_COLOR_MAP[c.color] || CARD_COLOR_MAP.blue;
       const iconBg = c.iconBg || palette.bg;
       return `
-      <table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="${palette.bg}" style="margin-bottom:10px;background-color:${palette.bg};border:1.5px solid ${palette.border};">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="${palette.border}" style="background-color:${palette.border};margin-bottom:0;">
         <tr>
-          <td width="66" valign="middle" style="padding:14px 12px;text-align:center;">
-            <table cellpadding="0" cellspacing="0" border="0" style="display:inline-table;">
+          <td style="padding:1px;">
+            <table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="${palette.bg}" style="background-color:${palette.bg};">
               <tr>
-                <td width="44" height="44" bgcolor="${iconBg}" style="background-color:${iconBg};text-align:center;vertical-align:middle;font-size:22px;line-height:44px;padding:0;">
+                <td width="66" valign="middle" bgcolor="${iconBg}" style="background-color:${iconBg};padding:14px 12px;text-align:center;font-size:22px;width:66px;">
                   ${c.icon}
+                </td>
+                <td valign="middle" style="padding:14px 16px;">
+                  <p style="margin:0 0 4px 0;font-size:${labelSize};font-weight:800;letter-spacing:2px;text-transform:uppercase;color:${palette.label};font-family:${fontStack};">${c.label}</p>
+                  <p style="margin:0;font-size:${bodySize};color:#1A2E3B;font-family:${fontStack};line-height:1.5;">${c.content}</p>
                 </td>
               </tr>
             </table>
           </td>
-          <td valign="middle" style="padding:14px 16px 14px 4px;">
-            <p style="margin:0 0 4px 0;font-size:${labelSize};font-weight:800;letter-spacing:2px;text-transform:uppercase;color:${palette.label};font-family:${fontStack};">${c.label}</p>
-            <p style="margin:0;font-size:${bodySize};color:#1A2E3B;font-family:${fontStack};line-height:1.5;">${c.content}</p>
-          </td>
         </tr>
-      </table>`;
+      </table>
+      <table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td height="8" style="font-size:0;line-height:0;mso-line-height-rule:exactly;">&nbsp;</td></tr></table>`;
     }).join('');
 
     const html = `<!DOCTYPE html>
@@ -346,31 +348,35 @@ export default function App() {
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <title>${headerTitle.replace(/<[^>]*>/g, '')} — Comunicado TI</title>
   <!--[if mso]><xml><o:OfficeDocumentSettings><o:PixelsPerInch>96</o:PixelsPerInch></o:OfficeDocumentSettings></xml><![endif]-->
+  <style>
+    table { border-collapse:collapse; mso-table-lspace:0pt; mso-table-rspace:0pt; }
+    img { -ms-interpolation-mode:bicubic; border:0; }
+  </style>
 </head>
-<body style="margin:0;padding:0;background-color:#C5CDD4;font-family:${fontStack};">
+<body style="margin:0;padding:0;background-color:#C5CDD4;">
 
 <table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#C5CDD4">
   <tr>
     <td align="center" bgcolor="#C5CDD4" style="padding:32px 16px;">
 
-      <table width="780" cellpadding="0" cellspacing="0" border="0">
+      <table width="780" cellpadding="0" cellspacing="0" border="0" style="width:780px;">
 
         <!-- HEADER -->
         <tr>
-          <td bgcolor="#1565A6" style="background:linear-gradient(100deg,#1565A6 0%,#1A7FAA 35%,#1E9A6E 68%,#2BBD5A 100%);padding:0 28px;height:88px;">
+          <td bgcolor="#1565A6" style="background:linear-gradient(100deg,#1565A6 0%,#1A7FAA 35%,#1E9A6E 68%,#2BBD5A 100%);padding:0 28px;height:88px;vertical-align:middle;">
             <table width="100%" cellpadding="0" cellspacing="0" border="0">
               <tr>
-                <td width="66" valign="middle" style="padding:11px 0;">
-                  <img src="${logoSrc}" width="66" height="66" alt="Logo" style="display:block;" />
+                <td width="66" valign="middle" style="padding:11px 0;width:66px;">
+                  <img src="${logoSrc}" width="66" height="66" alt="Logo" style="display:block;width:66px;height:66px;" />
                 </td>
                 <td valign="middle" style="padding:11px 0 11px 16px;">
-                  <p style="margin:0 0 2px 0;font-size:${labelSize};font-weight:700;letter-spacing:4px;color:#CCE0F5;text-transform:uppercase;font-family:${fontStack};">${headerEye}</p>
-                  <p style="margin:0;font-size:${headerSize};font-weight:800;letter-spacing:1.5px;color:#ffffff;text-transform:uppercase;line-height:1.1;font-family:${fontStack};">${headerTitle}</p>
+                  <p style="margin:0 0 2px 0;font-size:${labelSize};font-weight:700;letter-spacing:4px;color:#CCE0F5;text-transform:uppercase;font-family:${fontStack};mso-line-height-rule:exactly;">${headerEye}</p>
+                  <p style="margin:0;font-size:${headerSize};font-weight:800;letter-spacing:1.5px;color:#ffffff;text-transform:uppercase;line-height:1.1;font-family:${fontStack};mso-line-height-rule:exactly;">${headerTitle}</p>
                 </td>
-                <td width="130" valign="middle" align="right" style="padding:11px 0;">
+                <td width="140" valign="middle" align="right" style="padding:11px 0;width:140px;">
                   <table cellpadding="0" cellspacing="0" border="0" align="right">
                     <tr>
-                      <td bgcolor="#2a5fa8" style="background-color:#2a5fa8;border:1px solid #4d8fd4;padding:8px 16px;">
+                      <td bgcolor="#2a5fa8" style="background-color:#2a5fa8;padding:8px 14px;border:1px solid #4d8fd4;">
                         <p style="margin:0;font-size:13px;font-weight:700;color:#ffffff;letter-spacing:.5px;text-align:center;font-family:${fontStack};white-space:nowrap;">${dateDisplay}</p>
                       </td>
                     </tr>
@@ -393,57 +399,63 @@ export default function App() {
             <!-- Comm Header -->
             <table width="100%" cellpadding="0" cellspacing="0" border="0">
               <tr>
-                <td width="64" valign="top" style="padding-right:16px;padding-bottom:18px;">
-                  <table cellpadding="0" cellspacing="0" border="0">
+                <td width="64" valign="top" style="width:64px;padding-right:16px;">
+                  <table cellpadding="0" cellspacing="0" border="0" width="48">
                     <tr>
-                      <td width="48" height="48" bgcolor="#1565A6" style="background-color:#1565A6;text-align:center;vertical-align:middle;font-size:24px;line-height:48px;padding:0;">
+                      <td width="48" height="48" bgcolor="#1565A6" style="background-color:#1565A6;text-align:center;vertical-align:middle;font-size:24px;line-height:48px;padding:0;width:48px;">
                         ${mainIcon}
                       </td>
                     </tr>
                   </table>
                 </td>
-                <td valign="middle" style="padding-bottom:18px;">
+                <td valign="middle">
                   <p style="margin:0 0 3px 0;font-size:${titleSize};font-weight:800;letter-spacing:1px;color:#1A2E3B;text-transform:uppercase;font-family:${fontStack};">${commTitle}</p>
                   <p style="margin:0;font-size:13px;color:#4A6070;font-weight:600;letter-spacing:.5px;font-family:${fontStack};">${commSub}</p>
                 </td>
               </tr>
             </table>
 
+            <!-- Spacer -->
+            <table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td height="16" style="font-size:0;line-height:0;mso-line-height-rule:exactly;">&nbsp;</td></tr></table>
+
             <!-- Divider -->
-            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:18px;">
-              <tr>
-                <td height="1" bgcolor="#1565A6" style="font-size:0;line-height:0;mso-line-height-rule:exactly;">&nbsp;</td>
-              </tr>
+            <table width="100%" cellpadding="0" cellspacing="0" border="0">
+              <tr><td height="2" bgcolor="#1565A6" style="font-size:0;line-height:0;mso-line-height-rule:exactly;">&nbsp;</td></tr>
             </table>
 
+            <!-- Spacer -->
+            <table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td height="18" style="font-size:0;line-height:0;mso-line-height-rule:exactly;">&nbsp;</td></tr></table>
+
             <!-- Body Text -->
-            <p style="margin:0 0 22px 0;font-size:${bodySize};color:#1A2E3B;line-height:1.75;font-family:${fontStack};">${bodyText}</p>
+            <div style="font-size:${bodySize};color:#1A2E3B;line-height:1.75;font-family:${fontStack};">${bodyText}</div>
+
+            <!-- Spacer -->
+            <table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td height="22" style="font-size:0;line-height:0;mso-line-height-rule:exactly;">&nbsp;</td></tr></table>
 
             <!-- Cards -->
             ${cardsHTML}
 
-            <!-- Spacer -->
-            <table width="100%" cellpadding="0" cellspacing="0" border="0">
-              <tr><td height="18" style="font-size:0;line-height:0;mso-line-height-rule:exactly;">&nbsp;</td></tr>
-            </table>
-
             <!-- Alert -->
-            <table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#FFF8E1" style="background-color:#FFF8E1;border-left:4px solid #F59E0B;">
+            <table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#F59E0B" style="background-color:#F59E0B;">
               <tr>
-                <td width="54" valign="middle" style="padding:16px 12px;text-align:center;">
-                  <p style="margin:0;font-size:26px;line-height:1;">${alertIcon}</p>
-                </td>
-                <td valign="middle" style="padding:16px 16px 16px 0;">
-                  <p style="margin:0 0 4px 0;font-size:13px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:#92400E;font-family:${fontStack};">${alertTitle}</p>
-                  <p style="margin:0;font-size:${bodySize};color:#78350F;line-height:1.55;font-family:${fontStack};">${alertText}</p>
+                <td style="padding:0 0 0 4px;">
+                  <table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#FFF8E1" style="background-color:#FFF8E1;">
+                    <tr>
+                      <td width="54" valign="middle" style="padding:16px 12px;text-align:center;font-size:26px;width:54px;">
+                        ${alertIcon}
+                      </td>
+                      <td valign="middle" style="padding:16px 16px 16px 0;">
+                        <p style="margin:0 0 4px 0;font-size:13px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:#92400E;font-family:${fontStack};">${alertTitle}</p>
+                        <p style="margin:0;font-size:${bodySize};color:#78350F;line-height:1.55;font-family:${fontStack};">${alertText}</p>
+                      </td>
+                    </tr>
+                  </table>
                 </td>
               </tr>
             </table>
 
             <!-- Bottom padding -->
-            <table width="100%" cellpadding="0" cellspacing="0" border="0">
-              <tr><td height="26" style="font-size:0;line-height:0;mso-line-height-rule:exactly;">&nbsp;</td></tr>
-            </table>
+            <table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td height="26" style="font-size:0;line-height:0;mso-line-height-rule:exactly;">&nbsp;</td></tr></table>
 
           </td>
         </tr>
@@ -455,7 +467,7 @@ export default function App() {
               <tr>
                 <td valign="middle">
                   <span style="font-size:12px;font-weight:800;color:#ffffff;letter-spacing:2px;font-family:${fontStack};">${footerBrandTitle}</span>
-                  <span style="font-size:12px;color:#6B8FA3;font-family:${fontStack};"> &nbsp;·&nbsp; </span>
+                  <span style="font-size:11px;color:#6B8FA3;font-family:${fontStack};">&nbsp;·&nbsp;</span>
                   <span style="font-size:11px;color:#9DB5C4;letter-spacing:1px;font-family:${fontStack};">${footerBrandSub}</span>
                 </td>
                 <td valign="middle" align="right">
