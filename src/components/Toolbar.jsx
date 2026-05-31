@@ -40,8 +40,8 @@ export default function Toolbar({
   onChangeSize,
   onExportFile,
   onImportFile,
-  onExportPNG,
-  isExportingPNG,
+  onExportHTML,
+  isExportingHTML,
   onClearCache,
   showToast
 }) {
@@ -246,11 +246,11 @@ export default function Toolbar({
         </div>
         <button
           className="tbtn tbtn-print"
-          id="btnExportPNG"
-          onClick={onExportPNG}
-          disabled={isExportingPNG}
+          id="btnExportHTML"
+          onClick={onExportHTML}
+          disabled={isExportingHTML}
         >
-          {isExportingPNG ? '⏳ Gerando...' : '🖼️ Salvar PNG'}
+          {isExportingHTML ? '⏳ Gerando...' : '📧 Gerar E-mail HTML'}
         </button>
       </div>
 
@@ -349,11 +349,7 @@ export default function Toolbar({
           className="mbtn-clear"
           style={{ marginLeft: 'auto' }}
           title="Limpar dados salvos no navegador"
-          onClick={() => {
-            if (confirm('Apagar todos os dados salvos no navegador?')) {
-              onClearCache();
-            }
-          }}
+          onClick={onClearCache}
         >
           🗑️ Limpar cache
         </button>

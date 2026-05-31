@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
-import html2canvas from 'html2canvas';
 
 import Toolbar, { saveSelection } from './components/Toolbar';
 import CalendarModal from './components/CalendarModal';
+import ConfirmModal from './components/ConfirmModal';
 import IconPickerModal from './components/IconPickerModal';
 import InfoCard from './components/InfoCard';
 import AlertCard from './components/AlertCard';
@@ -19,6 +19,8 @@ const INITIAL_FIELDS = {
   bodyText: 'Prezados colaboradores,<br><br>Gostaríamos de informar que realizaremos uma <strong>manutenção programada</strong> em nossos servidores para melhorias de infraestrutura e segurança.<br><br>Durante o período indicado, alguns sistemas poderão apresentar instabilidade temporária. Agradecemos a compreensão de todos.',
   alertTitle: 'ATENÇÃO!',
   alertText: 'Lembramos que a manutenção poderá ser concluída antes do prazo previsto. Fique atento aos novos comunicados para atualizações.',
+  footerBrandTitle: 'TI INFORMA',
+  footerBrandSub: 'COMUNICAÇÃO INTERNA',
   footerText: 'Uso interno · Não encaminhe externamente'
 };
 
@@ -50,6 +52,8 @@ export default function App() {
   const [alertIcon, setAlertIcon] = useState('⚠️');
   const [alertTitle, setAlertTitle] = useState(INITIAL_FIELDS.alertTitle);
   const [alertText, setAlertText] = useState(INITIAL_FIELDS.alertText);
+  const [footerBrandTitle, setFooterBrandTitle] = useState(INITIAL_FIELDS.footerBrandTitle);
+  const [footerBrandSub, setFooterBrandSub] = useState(INITIAL_FIELDS.footerBrandSub);
   const [footerText, setFooterText] = useState(INITIAL_FIELDS.footerText);
 
   // Estado dos cartões
@@ -60,8 +64,14 @@ export default function App() {
   const [isIconPickerOpen, setIsIconPickerOpen] = useState(false);
   const [iconPickerTarget, setIconPickerTarget] = useState(null); // 'main', 'alert' ou cardId
 
-  // Estado de status do PNG
-  const [isExportingPNG, setIsExportingPNG] = useState(false);
+  // Estado de status da exportação HTML
+  const [isExportingHTML, setIsExportingHTML] = useState(false);
+
+  // Estado do modal de confirmação
+  const [confirmModal, setConfirmModal] = useState({ open: false, message: '', onConfirm: null });
+
+  const openConfirm = (message, onConfirm) => setConfirmModal({ open: true, message, onConfirm });
+  const closeConfirm = () => setConfirmModal({ open: false, message: '', onConfirm: null });
 
   // Ref para gerar identificadores únicos para novos cartões
   const cardCounterRef = useRef(3);
@@ -96,7 +106,8 @@ export default function App() {
     return () => clearTimeout(timer);
   }, [
     logoSrc, fontFamily, sizes, headerEye, headerTitle, dateDisplay,
-    commTitle, commSub, bodyText, mainIcon, alertIcon, alertTitle, alertText, footerText, cards
+    commTitle, commSub, bodyText, mainIcon, alertIcon, alertTitle, alertText,
+    footerBrandTitle, footerBrandSub, footerText, cards
   ]);
 
   // Toast Visual
@@ -130,6 +141,8 @@ export default function App() {
         alertIcon,
         alertTitle,
         alertText,
+        footerBrandTitle,
+        footerBrandSub,
         footerText,
         cards,
         savedAt: new Date().toISOString()
@@ -195,6 +208,8 @@ export default function App() {
       if (data.alertIcon !== undefined) setAlertIcon(data.alertIcon);
       if (data.alertTitle !== undefined) setAlertTitle(data.alertTitle);
       if (data.alertText !== undefined) setAlertText(data.alertText);
+      if (data.footerBrandTitle !== undefined) setFooterBrandTitle(data.footerBrandTitle);
+      if (data.footerBrandSub !== undefined) setFooterBrandSub(data.footerBrandSub);
       if (data.footerText !== undefined) setFooterText(data.footerText);
       if (data.cards) {
         setCards(data.cards);
@@ -238,6 +253,8 @@ export default function App() {
         alertIcon,
         alertTitle,
         alertText,
+        footerBrandTitle,
+        footerBrandSub,
         footerText,
         cards,
         exportVersion: '1.0',
@@ -268,10 +285,10 @@ export default function App() {
     reader.onload = (ev) => {
       try {
         const data = JSON.parse(ev.target.result);
-        if (confirm('Isso vai substituir o comunicado atual. Continuar?')) {
+        openConfirm('Isso vai substituir o comunicado atual. Continuar?', () => {
           loadData(data);
           showToast('✅ Arquivo importado com sucesso!');
-        }
+        });
       } catch (err) {
         console.error(err);
         showToast('❌ Erro ao ler o arquivo .tinf');
@@ -280,35 +297,183 @@ export default function App() {
     reader.readAsText(file);
   };
 
-  // Exportar para PNG (html2canvas)
-  const handleExportPNG = async () => {
-    const folder = document.getElementById('folder');
-    if (!folder) return;
+  // Mapa de cores para os cartões (card color → tons de fundo e borda)
+  const CARD_COLOR_MAP = {
+    blue:   { bg: '#EBF3FC', border: '#90CAF9', label: '#1565A6' },
+    green:  { bg: '#E6F6EF', border: '#A5D6A7', label: '#1E9A6E' },
+    lime:   { bg: '#E8F9EE', border: '#B9F6CA', label: '#2E7D32' },
+    orange: { bg: '#FEF3E8', border: '#FFCC80', label: '#E65100' },
+    red:    { bg: '#FDECEA', border: '#EF9A9A', label: '#C62828' },
+    purple: { bg: '#F3EAF9', border: '#CE93D8', label: '#6A1B9A' },
+  };
 
-    setIsExportingPNG(true);
-    folder.classList.add('is-exporting');
+  // Gera o HTML do email compatível com clientes de email (tabelas + inline styles)
+  const generateEmailHTML = () => {
+    const fontStack = `'${fontFamily}', Arial, Helvetica, sans-serif`;
+    const bodySize = sizes.body;
+    const titleSize = sizes.title;
+    const headerSize = sizes.header;
+    const labelSize = sizes.label;
 
+    // Cards HTML
+    const cardsHTML = cards.map((c) => {
+      const palette = CARD_COLOR_MAP[c.color] || CARD_COLOR_MAP.blue;
+      const iconBgColor = c.iconBg || palette.bg;
+      return `
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:10px;border-radius:10px;overflow:hidden;border:1.5px solid ${palette.border};background:${palette.bg};">
+        <tr>
+          <td width="54" valign="middle" style="padding:14px 12px;text-align:center;">
+            <div style="width:44px;height:44px;background:${iconBgColor};border-radius:10px;display:inline-flex;align-items:center;justify-content:center;font-size:22px;line-height:44px;text-align:center;">${c.icon}</div>
+          </td>
+          <td valign="middle" style="padding:14px 16px 14px 4px;">
+            <div style="font-size:${labelSize};font-weight:800;letter-spacing:2px;text-transform:uppercase;color:${palette.label};margin-bottom:4px;font-family:${fontStack};">${c.label}</div>
+            <div style="font-size:${bodySize};color:#1A2E3B;font-family:${fontStack};line-height:1.5;">${c.content}</div>
+          </td>
+        </tr>
+      </table>`;
+    }).join('');
+
+    const html = `<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>${headerTitle.replace(/<[^>]*>/g, '')} — Comunicado TI</title>
+  <!--[if mso]>
+  <noscript><xml><o:OfficeDocumentSettings><o:PixelsPerInch>96</o:PixelsPerInch></o:OfficeDocumentSettings></xml></noscript>
+  <![endif]-->
+</head>
+<body style="margin:0;padding:0;background:#C5CDD4;font-family:${fontStack};">
+
+<!-- Wrapper -->
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#C5CDD4;">
+  <tr><td align="center" style="padding:32px 16px;">
+
+    <!-- Container -->
+    <table width="780" cellpadding="0" cellspacing="0" border="0" style="max-width:780px;width:100%;border-radius:18px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,.18);">
+
+      <!-- HEADER -->
+      <tr>
+        <td style="background:linear-gradient(100deg,#1565A6 0%,#1A7FAA 35%,#1E9A6E 68%,#2BBD5A 100%);padding:0 28px;height:88px;">
+          <table width="100%" cellpadding="0" cellspacing="0" border="0">
+            <tr>
+              <td width="70" valign="middle" style="padding:11px 0;">
+                <img src="${logoSrc}" width="66" height="66" alt="Logo" style="display:block;border-radius:12px;object-fit:contain;" />
+              </td>
+              <td width="28" valign="middle" style="padding:0 4px;opacity:.65;">
+                <div style="font-size:0;line-height:0;">&#8250;&#8250;&#8250;</div>
+              </td>
+              <td valign="middle" style="padding:11px 0;">
+                <div style="font-size:${labelSize};font-weight:700;letter-spacing:4px;color:rgba(255,255,255,.8);text-transform:uppercase;font-family:${fontStack};">${headerEye}</div>
+                <div style="font-size:${headerSize};font-weight:800;letter-spacing:1.5px;color:#fff;text-transform:uppercase;line-height:1;font-family:${fontStack};">${headerTitle}</div>
+              </td>
+              <td width="120" valign="middle" align="right" style="padding:11px 0;">
+                <div style="background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.3);border-radius:8px;padding:8px 16px;font-size:13px;font-weight:700;color:#fff;letter-spacing:.5px;text-align:center;font-family:${fontStack};">${dateDisplay}</div>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+
+      <!-- STRIPE -->
+      <tr>
+        <td height="4" style="background:linear-gradient(90deg,#1565A6,#2BBD5A);font-size:0;line-height:0;">&nbsp;</td>
+      </tr>
+
+      <!-- BODY -->
+      <tr>
+        <td style="background:#F0F4F7;padding:26px 36px 0 36px;">
+
+          <!-- Comm Header -->
+          <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:18px;">
+            <tr>
+              <td width="54" valign="top" style="padding-right:16px;">
+                <div style="width:48px;height:48px;background:linear-gradient(135deg,#1565A6,#1E9A6E);border-radius:12px;display:inline-block;text-align:center;line-height:48px;font-size:24px;">${mainIcon}</div>
+              </td>
+              <td valign="middle">
+                <div style="font-size:${titleSize};font-weight:800;letter-spacing:1px;color:#1A2E3B;text-transform:uppercase;font-family:${fontStack};">${commTitle}</div>
+                <div style="font-size:13px;color:#4A6070;font-weight:600;letter-spacing:.5px;font-family:${fontStack};">${commSub}</div>
+              </td>
+            </tr>
+          </table>
+
+          <!-- Divider -->
+          <div style="height:1px;background:linear-gradient(90deg,#1565A6,#2BBD5A,transparent);margin-bottom:18px;"></div>
+
+          <!-- Body Text -->
+          <div style="font-size:${bodySize};color:#1A2E3B;line-height:1.75;margin-bottom:22px;font-family:${fontStack};">${bodyText}</div>
+
+          <!-- Cards -->
+          ${cardsHTML}
+
+          <!-- Alert -->
+          <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:18px;margin-bottom:0;background:#FFF8E1;border-radius:12px;border-left:4px solid #F59E0B;">
+            <tr>
+              <td width="54" valign="middle" style="padding:16px 12px;text-align:center;">
+                <div style="font-size:26px;line-height:1;">${alertIcon}</div>
+              </td>
+              <td valign="middle" style="padding:16px 16px 16px 0;">
+                <div style="font-size:13px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:#92400E;margin-bottom:4px;font-family:${fontStack};">${alertTitle}</div>
+                <div style="font-size:${bodySize};color:#78350F;line-height:1.55;font-family:${fontStack};">${alertText}</div>
+              </td>
+            </tr>
+          </table>
+
+        </td>
+      </tr>
+
+      <!-- FOOTER -->
+      <tr>
+        <td style="background:#1A2E3B;padding:16px 36px;">
+          <table width="100%" cellpadding="0" cellspacing="0" border="0">
+            <tr>
+              <td valign="middle">
+                <span style="font-size:12px;font-weight:800;color:#fff;letter-spacing:2px;font-family:${fontStack};">${footerBrandTitle}</span>
+                <span style="display:inline-block;width:5px;height:5px;background:#2BBD5A;border-radius:50%;vertical-align:middle;margin:0 8px;"></span>
+                <span style="font-size:11px;color:rgba(255,255,255,.6);letter-spacing:1px;font-family:${fontStack};">${footerBrandSub}</span>
+              </td>
+              <td valign="middle" align="right">
+                <span style="font-size:11px;color:rgba(255,255,255,.5);font-family:${fontStack};">${footerText}</span>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+
+      <!-- BOTTOM BAR -->
+      <tr>
+        <td height="6" style="background:linear-gradient(90deg,#1565A6,#2BBD5A);font-size:0;line-height:0;">&nbsp;</td>
+      </tr>
+
+    </table>
+  </td></tr>
+</table>
+
+</body>
+</html>`;
+
+    return html;
+  };
+
+  // Exportar como arquivo .html de e-mail
+  const handleExportHTML = () => {
+    setIsExportingHTML(true);
     try {
-      await document.fonts.ready;
-      const canvas = await html2canvas(folder, {
-        scale: 3,
-        useCORS: true,
-        allowTaint: true,
-        backgroundColor: '#F0F4F7',
-        logging: false
-      });
-
+      const html = generateEmailHTML();
+      const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
       const link = document.createElement('a');
-      link.download = 'ti_informa_comunicado.png';
-      link.href = canvas.toDataURL('image/png');
+      const date = new Date().toISOString().slice(0, 10);
+      link.download = `ti_informa_email_${date}.html`;
+      link.href = URL.createObjectURL(blob);
       link.click();
-      showToast('✅ Imagem PNG gerada e baixada!');
+      URL.revokeObjectURL(link.href);
+      showToast('✅ E-mail HTML gerado e baixado!');
     } catch (err) {
       console.error(err);
-      showToast('❌ Erro ao gerar PNG');
+      showToast('❌ Erro ao gerar e-mail HTML');
     } finally {
-      folder.classList.remove('is-exporting');
-      setIsExportingPNG(false);
+      setIsExportingHTML(false);
     }
   };
 
@@ -328,6 +493,8 @@ export default function App() {
     setAlertIcon('⚠️');
     setAlertTitle(INITIAL_FIELDS.alertTitle);
     setAlertText(INITIAL_FIELDS.alertText);
+    setFooterBrandTitle(INITIAL_FIELDS.footerBrandTitle);
+    setFooterBrandSub(INITIAL_FIELDS.footerBrandSub);
     setFooterText(INITIAL_FIELDS.footerText);
     setCards(INITIAL_CARDS);
     cardCounterRef.current = 3;
@@ -414,9 +581,11 @@ export default function App() {
         onChangeSize={(type, val) => setSizes({ ...sizes, [type]: val })}
         onExportFile={handleExportFile}
         onImportFile={handleImportFile}
-        onExportPNG={handleExportPNG}
-        isExportingPNG={isExportingPNG}
-        onClearCache={handleClearCache}
+        onExportHTML={handleExportHTML}
+        isExportingHTML={isExportingHTML}
+        onClearCache={() =>
+          openConfirm('Apagar todos os dados salvos no navegador?', handleClearCache)
+        }
         showToast={showToast}
       />
 
@@ -544,16 +713,29 @@ export default function App() {
         {/* Rodapé */}
         <div className="footer">
           <div className="footer-brand">
-            <span>TI INFORMA</span>
+            <span
+              contentEditable="true"
+              suppressContentEditableWarning={true}
+              onBlur={(e) => setFooterBrandTitle(e.target.innerHTML)}
+              dangerouslySetInnerHTML={{ __html: footerBrandTitle }}
+              style={{ padding: '2px 4px', borderRadius: '4px' }}
+            />
             <div className="footer-dot"></div>
-            <span>COMUNICAÇÃO INTERNA</span>
+            <span
+              contentEditable="true"
+              suppressContentEditableWarning={true}
+              onBlur={(e) => setFooterBrandSub(e.target.innerHTML)}
+              dangerouslySetInnerHTML={{ __html: footerBrandSub }}
+              style={{ padding: '2px 4px', borderRadius: '4px' }}
+            />
           </div>
-          <span
+          <div
             contentEditable="true"
             suppressContentEditableWarning={true}
             onBlur={(e) => setFooterText(e.target.innerHTML)}
             dangerouslySetInnerHTML={{ __html: footerText }}
-          />
+            style={{ padding: '2px 4px', borderRadius: '4px', minWidth: '80px' }}
+          ></div>
         </div>
 
         {/* Barra inferior */}
@@ -561,6 +743,13 @@ export default function App() {
       </div>
 
       {/* Modais */}
+      <ConfirmModal
+        isOpen={confirmModal.open}
+        message={confirmModal.message}
+        onConfirm={() => { confirmModal.onConfirm?.(); closeConfirm(); }}
+        onCancel={closeConfirm}
+      />
+
       <CalendarModal
         isOpen={isCalendarOpen}
         onClose={() => setIsCalendarOpen(false)}

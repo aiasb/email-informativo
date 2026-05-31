@@ -578,6 +578,67 @@ input[type=range] {
   display: block;
 }
 
+/* CONFIRM MODAL */
+.confirm-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10001;
+  background: rgba(0,0,0,.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.confirm-popup {
+  background: #fff;
+  border-radius: 14px;
+  padding: 28px 28px 20px;
+  width: 340px;
+  box-shadow: 0 12px 48px rgba(0,0,0,.28);
+}
+
+.confirm-message {
+  margin: 0 0 22px;
+  font-size: 15px;
+  color: #1A2E3B;
+  line-height: 1.5;
+  font-family: 'Barlow', sans-serif;
+}
+
+.confirm-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.confirm-btn-cancel {
+  padding: 8px 18px;
+  border-radius: 8px;
+  border: 1.5px solid #C5D5E0;
+  background: #fff;
+  color: #4A6070;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: 'Barlow', sans-serif;
+  transition: background .15s;
+}
+.confirm-btn-cancel:hover { background: #F0F4F7; }
+
+.confirm-btn-ok {
+  padding: 8px 18px;
+  border-radius: 8px;
+  border: none;
+  background: #1565A6;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: 'Barlow', sans-serif;
+  transition: background .15s;
+}
+.confirm-btn-ok:hover { background: #1A7FAA; }
+
 /* CALENDÁRIO POPUP */
 .cal-overlay {
   display: none;
