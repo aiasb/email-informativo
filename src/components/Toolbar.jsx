@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import { useRef } from 'react';
 
 // Variável para guardar a seleção ativa do usuário
 let savedRange = null;
@@ -32,7 +32,6 @@ const getEditableTarget = () => {
 };
 
 export default function Toolbar({
-  logoSrc,
   onChangeLogo,
   fontFamily,
   onChangeFont,
@@ -250,7 +249,7 @@ export default function Toolbar({
           onClick={onExportHTML}
           disabled={isExportingHTML}
         >
-          {isExportingHTML ? '⏳ Gerando...' : '📧 Gerar E-mail HTML'}
+          {isExportingHTML ? '⏳ Gerando...' : '📧 Abrir no Outlook'}
         </button>
       </div>
 

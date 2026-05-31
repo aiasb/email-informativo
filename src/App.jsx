@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 import Toolbar, { saveSelection } from './components/Toolbar';
 import CalendarModal from './components/CalendarModal';
@@ -456,22 +456,56 @@ export default function App() {
     return html;
   };
 
-  // Exportar como arquivo .html de e-mail
+  // Gera arquivo .eml com o HTML como anexo — ao abrir, o Outlook cria o rascunho com o anexo
   const handleExportHTML = () => {
     setIsExportingHTML(true);
     try {
       const html = generateEmailHTML();
-      const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
-      const link = document.createElement('a');
       const date = new Date().toISOString().slice(0, 10);
-      link.download = `ti_informa_email_${date}.html`;
+      const attachName = `ti_informa_email_${date}.html`;
+      const subject = headerTitle.replace(/<[^>]*>/g, '') + ' — Comunicado TI';
+
+      // UTF-8 → base64 (compatível com caracteres especiais)
+      const bytes = new TextEncoder().encode(html);
+      let binary = '';
+      bytes.forEach(b => { binary += String.fromCharCode(b); });
+      const htmlBase64 = btoa(binary);
+      // Quebra em linhas de 76 chars (padrão MIME)
+      const htmlB64Chunked = htmlBase64.match(/.{1,76}/g).join('\r\n');
+
+      const boundary = `----=_Part_${Date.now()}`;
+
+      const eml = [
+        'MIME-Version: 1.0',
+        `Date: ${new Date().toUTCString()}`,
+        `Subject: ${subject}`,
+        `Content-Type: multipart/mixed; boundary="${boundary}"`,
+        '',
+        `--${boundary}`,
+        'Content-Type: text/plain; charset=UTF-8',
+        '',
+        'Prezados, segue em anexo o comunicado de TI.',
+        '',
+        `--${boundary}`,
+        `Content-Type: text/html; charset=UTF-8; name="${attachName}"`,
+        'Content-Transfer-Encoding: base64',
+        `Content-Disposition: attachment; filename="${attachName}"`,
+        '',
+        htmlB64Chunked,
+        '',
+        `--${boundary}--`,
+      ].join('\r\n');
+
+      const blob = new Blob([eml], { type: 'message/rfc822' });
+      const link = document.createElement('a');
+      link.download = `ti_informa_${date}.eml`;
       link.href = URL.createObjectURL(blob);
       link.click();
       URL.revokeObjectURL(link.href);
-      showToast('✅ E-mail HTML gerado e baixado!');
+      showToast('✅ Arquivo .eml gerado — abra para enviar pelo Outlook');
     } catch (err) {
       console.error(err);
-      showToast('❌ Erro ao gerar e-mail HTML');
+      showToast('❌ Erro ao gerar arquivo .eml');
     } finally {
       setIsExportingHTML(false);
     }
@@ -538,19 +572,6 @@ export default function App() {
     setCards(cards.map(c => c.id === id ? { ...c, ...updatedFields } : c));
   };
 
-  // Atualizar campo de conteúdo
-  const handleUpdateField = (key, value) => {
-    switch (key) {
-      case 'headerEye': setHeaderEye(value); break;
-      case 'headerTitle': setHeaderTitle(value); break;
-      case 'commTitle': setCommTitle(value); break;
-      case 'commSub': setCommSub(value); break;
-      case 'bodyText': setBodyText(value); break;
-      case 'footerText': setFooterText(value); break;
-      default: break;
-    }
-  };
-
   // Modal de Ícones
   const openIconPicker = (target) => {
     setIconPickerTarget(target);
@@ -573,7 +594,6 @@ export default function App() {
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '14px', width: '100%' }}>
       {/* Barra de Ferramentas */}
       <Toolbar
-        logoSrc={logoSrc}
         onChangeLogo={handleLogoChange}
         fontFamily={fontFamily}
         onChangeFont={setFontFamily}

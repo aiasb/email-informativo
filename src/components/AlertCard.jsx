@@ -1,5 +1,3 @@
-import React from 'react';
-
 export default function AlertCard({ alertIcon, alertTitle, alertText, onIconClick, onUpdate }) {
   return (
     <div className="alert">

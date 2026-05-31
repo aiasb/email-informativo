@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 const COLOR_PALETTES = {
   blue:   ['#EBF3FC', '#BBDEFB', '#90CAF9', '#64B5F6', '#42A5F5'],
